@@ -2,6 +2,23 @@ const startInput = document.getElementById('startDate');
 const endInput = document.getElementById('endDate');
 const button = document.querySelector('button');
 const gallery = document.getElementById('gallery');
+const facts = [
+  "A day on Venus is longer than a year on Venus.",
+  "Neutron stars can spin 600 times per second.",
+  "There are more stars in the universe than grains of sand on Earth.",
+  "The Moon is slowly drifting away from Earth.",
+  "One spoon of a neutron star would weigh about a billion tons.",
+  "Saturn’s rings are made mostly of ice particles.",
+  "Space is completely silent—there’s no air to carry sound.",
+  "The Sun makes up 99.86% of the mass in our solar system."
+];
+
+function displayRandomFact() {
+  const fact = facts[Math.floor(Math.random() * facts.length)];
+  document.getElementById('spaceFact').textContent = `🛰️ Did You Know? ${fact}`;
+}
+
+displayRandomFact(); // Call when page loads
 
 // Call date setup function from dateRange.js
 setupDateInputs(startInput, endInput);
@@ -57,16 +74,38 @@ function renderGallery(images) {
 function openModal(item) {
   const modal = document.createElement('div');
   modal.className = 'modal-overlay';
+
+  let mediaContent = '';
+  if (item.media_type === 'image') {
+    mediaContent = `<img src="${item.hdurl || item.url}" alt="${item.title}" />`;
+  } else if (item.media_type === 'video') {
+    if (item.url.includes('youtube.com') || item.url.includes('youtu.be')) {
+      const embedUrl = item.url.includes('embed') ? item.url : item.url.replace("watch?v=", "embed/");
+      mediaContent = `
+        <div class="video-container">
+          <iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
+        </div>
+      `;
+    } else {
+      mediaContent = `<a href="${item.url}" target="_blank">Watch the video here</a>`;
+    }
+  }
+
   modal.innerHTML = `
     <div class="modal">
       <button class="close-btn">&times;</button>
-      <img src="${item.hdurl || item.url}" alt="${item.title}" />
+      ${mediaContent}
       <h2>${item.title}</h2>
-      <p><em>${item.date}</em></p>
-      <p>${item.explanation}</p>
+      <p class="modal-date">${item.date}</p>
+      <div class="modal-explanation">${item.explanation}</div>
     </div>
   `;
 
+  document.body.classList.add('modal-open');
   document.body.appendChild(modal);
-  modal.querySelector('.close-btn').addEventListener('click', () => modal.remove());
+
+  modal.querySelector('.close-btn').addEventListener('click', () => {
+    modal.remove();
+    document.body.classList.remove('modal-open');
+  });
 }
